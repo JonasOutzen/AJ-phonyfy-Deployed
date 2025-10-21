@@ -1,6 +1,6 @@
 package app.dtos;
 
-import app.entities.Sample;
+import app.entities.Artist;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -17,7 +17,7 @@ public class SampleDTO {
     private String userName;
     private Integer sampleNumber;
 
-    public SampleDTO(Sample sample) {
+    public SampleDTO(Artist sample) {
         this.id = sample.getId();
         this.userName = sample.getUserName();
         this.sampleNumber = sample.getSampleNumber();
@@ -29,7 +29,7 @@ public class SampleDTO {
         this.sampleNumber = sampleNumber;
     }
 
-    public static List<SampleDTO> toDTOList(List<Sample> resultList) {
+    public static List<SampleDTO> toDTOList(List<Artist> resultList) {
         return resultList.stream().map(SampleDTO::new).toList();
     }
 }

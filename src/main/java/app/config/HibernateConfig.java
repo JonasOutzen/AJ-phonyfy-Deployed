@@ -1,6 +1,8 @@
 package app.config;
 
 import app.entities.*;
+import app.security.entities.Role;
+import app.security.entities.User;
 import app.utils.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
@@ -46,6 +48,9 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(Song.class);
         configuration.addAnnotatedClass(UserProfile.class);
 
+        // Security entities
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Role.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {

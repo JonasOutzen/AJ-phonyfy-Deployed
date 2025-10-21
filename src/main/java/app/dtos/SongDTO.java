@@ -51,20 +51,6 @@ public class SongDTO {
         song.setFeaturedArtist(this.featuredArtist);
         song.setDuration(this.duration);
 
-        if (this.mainArtistId != null) {
-            Artist artist = new Artist();
-            artist.setId(this.mainArtistId);
-            artist.setArtistName(this.mainArtistName);
-            song.setMainArtist(artist);
-        }
-
-        if (this.albumId != null) {
-            Album album = new Album();
-            album.setId(this.albumId);
-            album.setAlbumName(this.albumName);
-            song.setAlbum(album);
-        }
-
         return song;
     }
 

@@ -1,7 +1,7 @@
 package app.daos;
 
 import app.dtos.SampleDTO;
-import app.entities.Sample;
+import app.entities.Artist;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
@@ -25,13 +25,13 @@ public class SampleDAO {
 
     public List<SampleDTO> getAllSamples() {
         try (var em = emf.createEntityManager()) {
-            TypedQuery<Sample> query = em.createQuery("SELECT s FROM Sample s", Sample.class);
+            TypedQuery<Artist> query = em.createQuery("SELECT s FROM Artist s", Artist.class);
             return SampleDTO.toDTOList(query.getResultList());
         }
     }
 
     public SampleDTO create(SampleDTO dto) {
-        var entity = new Sample(dto);
+        var entity = new Artist(dto);
         try (var em = emf.createEntityManager()) {
             var tx = em.getTransaction();
             tx.begin();
@@ -51,7 +51,7 @@ public class SampleDAO {
 
     public SampleDTO getById(int id) {
         try (var em = emf.createEntityManager()) {
-            var entity = em.find(Sample.class, id);
+            var entity = em.find(Artist.class, id);
             return (entity != null) ? new SampleDTO(entity) : null;
         }
     }
@@ -59,7 +59,7 @@ public class SampleDAO {
     // Note: returns null if entity not found
     public SampleDTO update(int id, SampleDTO dto) {
         try (var em = emf.createEntityManager()) {
-            Sample entity = em.find(Sample.class, id);
+            Artist entity = em.find(Artist.class, id);
             if (entity != null) {
                 var tx = em.getTransaction();
                 tx.begin();
@@ -77,7 +77,7 @@ public class SampleDAO {
         try (var em = emf.createEntityManager()) {
             var tx = em.getTransaction();
             tx.begin();
-            var entity = em.find(Sample.class, id);
+            var entity = em.find(Artist.class, id);
             if (entity != null) {
                 em.remove(entity);
             }
@@ -89,7 +89,7 @@ public class SampleDAO {
         try (var em = emf.createEntityManager()) {
             var tx = em.getTransaction();
             tx.begin();
-            em.createQuery("DELETE FROM Sample").executeUpdate();
+            em.createQuery("DELETE FROM Artist").executeUpdate();
             tx.commit();
         }
     }

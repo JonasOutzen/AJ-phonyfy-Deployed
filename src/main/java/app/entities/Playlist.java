@@ -37,6 +37,8 @@ public class Playlist {
             referencedColumnName = "playlist_id")},
             inverseJoinColumns = {@JoinColumn(name = "song_id", referencedColumnName = "song_id")}
     )
+
+    @Builder.Default
     private Set<Song> songs = new HashSet<>();
 
 

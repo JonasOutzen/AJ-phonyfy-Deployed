@@ -19,13 +19,14 @@ import java.time.*;
 public class Album {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "album_id", length = 100, nullable = false)
     private int id;
 
     @Column(name = "album_name", length = 100, nullable = false)
     private String albumName;
 
     @Column(name = "release_date", length = 100, nullable = false)
-    private LocalDateTime releaseDate;
+    private LocalDate releaseDate;
 
     @Column(name = "total_duration", nullable = false)
     private String totalDuration = "0:00";

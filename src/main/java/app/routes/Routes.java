@@ -7,11 +7,11 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 
 public class Routes {
 
-private Sample1Routes sample1Routes = new Sample1Routes();
+    private Sample1Routes sample1Routes = new Sample1Routes();
 
-public EndpointGroup getRoutes() {
-    return () -> {
-        path("/sample1", sample1Routes.getRoutes());
-    };
-}
+    public EndpointGroup getRoutes() {
+        return () -> {
+            path("/sample1", sample1Routes.getRoutes());
+        };
+    }
 }

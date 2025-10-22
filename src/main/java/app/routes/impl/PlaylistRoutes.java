@@ -19,7 +19,8 @@ public class PlaylistRoutes {
             // Get
             get("/", playlistController::readAll);
             get("/{id}", playlistController::read);
-            get("/{username}", playlistController::readPlaylistsByOwner);
+            // http://localhost:7076/api/playlists/user/jonas
+            get("/user/{username}", playlistController::readPlaylistsByOwner);
 
             // Put
             put("/{id}", playlistController::update, Role.ADMIN);

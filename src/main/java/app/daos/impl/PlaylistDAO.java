@@ -37,6 +37,17 @@ public class PlaylistDAO implements IDAO<PlaylistDTO, Integer> {
         }
     }
 
+    public List<PlaylistDTO> readPlaylistsByOwner(String username) {
+        try (var em = emf.createEntityManager()) {
+            var q = em.createQuery(
+                    "SELECT new app.dtos.PlaylistDTO(p) FROM Playlist p WHERE p.owner.username = :u",
+                    PlaylistDTO.class
+            );
+            q.setParameter("u", username);
+            return q.getResultList();
+        }
+    }
+
     @Override
     public List<PlaylistDTO> readAll() {
         try (EntityManager em = emf.createEntityManager()) {

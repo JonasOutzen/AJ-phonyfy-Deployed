@@ -1,6 +1,7 @@
 package app.daos.impl;
 
 import app.daos.IDAO;
+import app.dtos.AlbumDTO;
 import app.dtos.ArtistDTO;
 import app.entities.Artist;
 import app.entities.Album;
@@ -33,6 +34,17 @@ public class ArtistDAO implements IDAO<ArtistDTO, Integer> {
         try (EntityManager em = emf.createEntityManager()) {
             Artist artist = em.find(Artist.class, integer);
             return new ArtistDTO(artist);
+        }
+    }
+
+    public List<AlbumDTO> readAlbumsByArtistId(Integer artistId) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<AlbumDTO> query = em.createQuery(
+                    "SELECT new app.dtos.AlbumDTO(a) FROM Album a WHERE a.artist.id = :artistId",
+                    AlbumDTO.class
+            );
+            query.setParameter("artistId", artistId);
+            return query.getResultList();
         }
     }
 

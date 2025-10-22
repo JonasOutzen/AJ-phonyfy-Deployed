@@ -5,6 +5,7 @@ import app.entities.Artist;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class AlbumDTO {
 
     private Integer id;
     private String albumName;
-    private LocalDateTime releaseDate;
+    private LocalDate releaseDate;
     private String totalDuration;
     private Integer artistId;
     private String artistName;

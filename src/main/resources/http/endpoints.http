@@ -1,0 +1,163 @@
+
+@baseUrl = http://localhost:7076
+@authToken = {{authToken}}
+
+### ===================== SECURITY =====================
+
+### Health check
+GET {{baseUrl}}/auth/healthcheck
+
+### Test (open)
+GET {{baseUrl}}/auth/test
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "testpass"
+}
+
+> {% client.global.set("authToken", JSON.parse(response.body).token); %}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "testpass"
+}
+
+> {% client.global.set("authToken", JSON.parse(response.body).token); %}
+
+### Add role to current user (requires USER)
+# Example roles: "USER", "ADMIN" (case-insensitive on server side if you handle normalization)
+POST {{baseUrl}}/auth/user/addrole
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+### ===================== PROTECTED DEMOS =====================
+
+### USER protected demo (requires token with USER role)
+GET {{baseUrl}}/protected/user_demo
+Authorization: Bearer {{authToken}}
+
+### ADMIN protected demo (requires token with ADMIN role)
+GET {{baseUrl}}/protected/admin_demo
+Authorization: Bearer {{authToken}}
+
+### ===================== SONGS =====================
+
+### Get all songs
+GET {{baseUrl}}/songs
+
+### Get song by ID
+GET {{baseUrl}}/songs/1
+
+### Create song (typically protected)
+POST {{baseUrl}}/songs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "songName": "Hello World",
+  "albumName": "Demo Album",
+  "mainArtistName": "Demo Artist",
+  "genre": "POP",
+  "duration": "3:45"
+}
+
+### Update song by ID (typically protected)
+PUT {{baseUrl}}/songs/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "songName": "Hello Universe",
+  "albumName": "Demo Album 2",
+  "mainArtistName": "Demo Artist",
+  "genre": "ROCK",
+  "duration": "4:15"
+}
+
+### Delete song by ID (typically protected)
+DELETE {{baseUrl}}/songs/1
+Authorization: Bearer {{authToken}}
+
+### ===================== ARTISTS =====================
+
+### Get all artists
+GET {{baseUrl}}/artists
+
+### Get artist by ID
+GET {{baseUrl}}/artists/1
+
+### Create artist (typically protected)
+POST {{baseUrl}}/artists
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "artistName": "New Artist",
+  "type": "Solo"
+}
+
+### Update artist by ID (typically protected)
+PUT {{baseUrl}}/artists/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "artistName": "Updated Artist",
+  "type": "Band"
+}
+
+### Delete artist by ID (typically protected)
+DELETE {{baseUrl}}/artists/1
+Authorization: Bearer {{authToken}}
+
+### Get albums for artist (if mapped in ArtistRoutes)
+GET {{baseUrl}}/artists/1/albums
+
+### ===================== PLAYLISTS =====================
+
+### Get all playlists
+GET {{baseUrl}}/playlists
+
+### Get playlist by ID
+GET {{baseUrl}}/playlists/1
+
+### Get playlists by username
+GET {{baseUrl}}/playlists/user/testuser
+
+### Create playlist (typically protected)
+POST {{baseUrl}}/playlists
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "playListName": "My Vibes",
+  "ownerUsername": "testuser",
+  "songIds": [1, 2, 3]
+}
+
+### Update playlist by ID (typically protected)
+PUT {{baseUrl}}/playlists/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "playListName": "Updated Vibes",
+  "ownerUsername": "testuser",
+  "songIds": [2, 4]
+}
+
+### Delete playlist by ID (typically protected)
+DELETE {{baseUrl}}/playlists/1
+Authorization: Bearer {{authToken}}

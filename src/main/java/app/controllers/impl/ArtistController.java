@@ -37,6 +37,22 @@ public class ArtistController implements IController<ArtistDTO, Integer> {
         ctx.json(list, ArtistDTO.class);
     }
 
+    public void createAlbumForArtist(Context ctx) {
+        int artistId = ctx.pathParamAsClass("id", Integer.class)
+                .check(this::validatePrimaryKey, "Not a valid artist id").get();
+
+        AlbumDTO req = ctx.bodyValidator(AlbumDTO.class)
+                .check(a -> a.getAlbumName() != null && !a.getAlbumName().isBlank(), "Album name must be set")
+                .get();
+
+        // bind album to artist from path
+        req.setArtistId(artistId);
+
+        AlbumDTO created = albumDao.create(req);
+        ctx.status(201).json(created, AlbumDTO.class);
+    }
+
+
     // Extra: GET /artists/{id}/albums
     public void readAlbumsByArtist(Context ctx) {
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid key").get();

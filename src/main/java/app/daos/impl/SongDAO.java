@@ -48,26 +48,42 @@ public class SongDAO implements IDAO<SongDTO, Integer> {
     @Override
     public SongDTO create(SongDTO songDTO) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Look up by names first
+            Artist artist = em.createQuery(
+                            "select a from Artist a where lower(a.artistName) = lower(:n)", Artist.class)
+                    .setParameter("n", songDTO.getMainArtistName().trim())
+                    .getResultStream().findFirst()
+                    .orElse(null);
+
+            if (artist == null) {
+                throw new IllegalArgumentException("Artist not found: " + songDTO.getMainArtistName());
+            }
+
+            Album album = em.createQuery(
+                            "select al from Album al where lower(al.albumName) = lower(:n) and al.artist.id = :aid", Album.class)
+                    .setParameter("n", songDTO.getAlbumName().trim())
+                    .setParameter("aid", artist.getId())
+                    .getResultStream().findFirst()
+                    .orElse(null);
+
+            if (album == null) {
+                throw new IllegalArgumentException("Album not found for artist '" + artist.getArtistName() +
+                        "': " + songDTO.getAlbumName());
+            }
+
             em.getTransaction().begin();
-
-            if (songDTO.getMainArtistId() != null) {
-                throw new IllegalArgumentException("Main Artist ID is required");
-            }
-
-            if (songDTO.getAlbumId() != null) {
-                throw new IllegalArgumentException("Album ID is required");
-            }
 
             Song s = songDTO.toEntity();
             s.setSongId(null);
-            s.setMainArtist(em.getReference(Artist.class, songDTO.getMainArtistId()));
-            s.setAlbum(em.getReference(Album.class, songDTO.getAlbumId()));
+            s.setMainArtist(artist);
+            s.setAlbum(album);
 
             em.persist(s);
             em.getTransaction().commit();
             return new SongDTO(s);
         }
     }
+
 
     @Override
     public SongDTO update(Integer integer, SongDTO songDTO) {
@@ -99,13 +115,23 @@ public class SongDAO implements IDAO<SongDTO, Integer> {
     }
 
     @Override
-    public void delete(Integer integer) {
+    public void delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Song s = em.find(Song.class, integer);
+
+            Song s = em.find(Song.class, id);
             if (s != null) {
+                // Ensure associations are broken so the Song won't be cascaded back
+                // Use a copy to avoid ConcurrentModification
+                var playlistsCopy = new java.util.HashSet<>(s.getPlaylists());
+                for (var p : playlistsCopy) {
+                    p.getSongs().remove(s);   // break the link on the owning side
+                }
+                s.getPlaylists().clear();      // break on the inverse side (if mapped)
+
                 em.remove(s);
             }
+
             em.getTransaction().commit();
         }
     }

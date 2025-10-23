@@ -14,6 +14,7 @@ public class ArtistRoutes {
         return () -> {
             // Post
             post("/", artistController::create, Role.ADMIN);
+            post("/{id}/albums", artistController::createAlbumForArtist, Role.ADMIN);
 
             // Get
             get("/", artistController::readAll);

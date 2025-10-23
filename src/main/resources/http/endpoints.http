@@ -1,8 +1,11 @@
+@baseUrl = {{baseUrl}}
+@authToken = {{authToken}}
+# Manual override (optional): uncomment and paste a JWT if you want to force a specific token
+# @authToken = eyJhbGciOiJIUzI1NiJ9...
 
-@baseUrl = http://localhost:7076/api
-@authToken = eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJKb25hcyBSZWluaG9sZCBPdXR6ZW4iLCJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MTIxNTgxOSwicm9sZXMiOiJBRE1JTix1c2VyIiwidXNlcm5hbWUiOiJ0ZXN0dXNlciJ9.p_mB5-9cASexW6SyyXAl_nOjp3YLzWcE3ckbM2QEzkQ
-
-### ===================== SECURITY =====================
+####################################################################
+### SECURITY
+####################################################################
 
 ### Health check (open)
 GET {{baseUrl}}/auth/healthcheck
@@ -10,7 +13,8 @@ GET {{baseUrl}}/auth/healthcheck
 ### Test (open)
 GET {{baseUrl}}/auth/test
 
-### Register
+### Register (returns token). If user exists, skip.
+# @name register
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -19,9 +23,22 @@ Content-Type: application/json
   "password": "testpass"
 }
 
-> {% client.global.set("authToken", JSON.parse(response.body).token); %}
+> {%
+  try {
+    const data = JSON.parse(response.body);
+    if (data.token) {
+      client.global.set("authToken", data.token);
+      client.log("Saved authToken from REGISTER: " + data.token);
+    } else {
+      client.log("No token field in register response");
+    }
+  } catch (e) {
+    client.log("Register parse error: " + e);
+  }
+%}
 
-### Login
+### Login (returns token) — run this to refresh token
+# @name login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -30,10 +47,25 @@ Content-Type: application/json
   "password": "testpass"
 }
 
-> {% client.global.set("authToken", JSON.parse(response.body).token); %}
+> {%
+  try {
+    const data = JSON.parse(response.body);
+    if (data.token) {
+      client.global.set("authToken", data.token);
+      client.log("Saved authToken from LOGIN: " + data.token);
+    } else {
+      client.log("No token field in login response");
+    }
+  } catch (e) {
+    client.log("Login parse error: " + e);
+  }
+%}
 
-### Add role to current user (requires USER)
-# Example roles: "USER", "ADMIN"
+### Add ADMIN role to current user (requires USER)
+# After this, run LOGIN again and add the new token to
+#    "baseUrl": "http://localhost:7076/api",
+#    "authToken":
+
 POST {{baseUrl}}/auth/user/addrole
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -42,25 +74,43 @@ Content-Type: application/json
   "role": "ADMIN"
 }
 
-### ===================== PROTECTED DEMOS =====================
+### Login again to get a token that includes ADMIN
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
 
-### USER protected demo (requires token with USER role)
+{
+  "username": "testuser",
+  "password": "testpass"
+}
+
+> {%
+  try {
+    const data = JSON.parse(response.body);
+    if (data.token) {
+      client.global.set("authToken", data.token);
+      client.log("Saved ADMIN authToken from LOGIN: " + data.token);
+    } else {
+      client.log("No token field in login response");
+    }
+  } catch (e) {
+    client.log("Login parse error: " + e);
+  }
+%}
+
+### USER protected demo (needs USER)
 GET {{baseUrl}}/protected/user_demo
 Authorization: Bearer {{authToken}}
 
-### ADMIN protected demo (requires token with ADMIN role)
+### ADMIN protected demo (needs ADMIN)
 GET {{baseUrl}}/protected/admin_demo
 Authorization: Bearer {{authToken}}
 
-### ===================== SONGS =====================
+####################################################################
+### ARTISTS + ALBUMS
+####################################################################
 
-### Get all songs
-GET {{baseUrl}}/songs
-
-### Get song by ID
-GET {{baseUrl}}/songs/1
-
-### Create Artist
+### Create artist (ADMIN)
 POST {{baseUrl}}/artists
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -69,17 +119,54 @@ Content-Type: application/json
   "artistName": "Demo Artist",
   "type": "Solo"
 }
-### Create Album
-POST {{baseUrl}}/albums
+
+### Get all artists (open)
+GET {{baseUrl}}/artists
+
+### Get artist by ID (open)
+GET {{baseUrl}}/artists/1
+
+### Update artist (ADMIN)
+PUT {{baseUrl}}/artists/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "artistName": "Updated Demo Artist",
+  "type": "Band"
+}
+
+### Delete artist (ADMIN)
+DELETE {{baseUrl}}/artists/1
+Authorization: Bearer {{authToken}}
+
+### Get albums for artist (open)
+GET {{baseUrl}}/artists/1/albums
+
+### Create album for artist (ADMIN) — nested route
+# Replace {artistId} with the actual artist id returned from create artist
+POST {{baseUrl}}/artists/13/albums
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
   "albumName": "Demo Album",
-  "artistId": 13
+  "releaseDate": "2025-10-23",
+  "totalDuration": "00:00:00"
 }
 
-### Create song (protected)
+####################################################################
+### SONGS
+####################################################################
+
+### Get all songs (open)
+GET {{baseUrl}}/songs
+
+### Get song by ID (open)
+GET {{baseUrl}}/songs/1
+
+### Create song (protected; your SongDAO looks up by names)
+# Ensure the artist/album above exist with those names
 POST {{baseUrl}}/songs
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -88,11 +175,11 @@ Content-Type: application/json
   "songName": "Hello World",
   "albumName": "Demo Album",
   "mainArtistName": "Demo Artist",
-  "genre": "TEST",
-  "duration": "3:45"
+  "genre": "POP",
+  "duration": "03:45"
 }
 
-### Update song by ID (protected)
+### Update song (protected)
 PUT {{baseUrl}}/songs/1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -102,58 +189,25 @@ Content-Type: application/json
   "albumName": "Demo Album 2",
   "mainArtistName": "Demo Artist",
   "genre": "ROCK",
-  "duration": "4:15"
+  "duration": "04:15"
 }
 
-### Delete song by ID (protected)
+### Delete song (protected) — will fail if used by playlists unless associations are cleared
 DELETE {{baseUrl}}/songs/1
 Authorization: Bearer {{authToken}}
 
-### ===================== ARTISTS =====================
+####################################################################
+### PLAYLISTS
+####################################################################
 
-### Get all artists
-GET {{baseUrl}}/artists
-
-### Get artist by ID
-GET {{baseUrl}}/artists/1
-
-### Create artist (protected)
-POST {{baseUrl}}/artists
-Authorization: Bearer {{authToken}}
-Content-Type: application/json
-
-{
-  "artistName": "New Artist",
-  "type": "Solo"
-}
-
-### Update artist by ID (protected)
-PUT {{baseUrl}}/artists/1
-Authorization: Bearer {{authToken}}
-Content-Type: application/json
-
-{
-  "artistName": "Updated Artist",
-  "type": "Band"
-}
-
-### Delete artist by ID (protected)
-DELETE {{baseUrl}}/artists/1
-Authorization: Bearer {{authToken}}
-
-### Get albums for artist (if mapped in ArtistRoutes)
-GET {{baseUrl}}/artists/1/albums
-
-### ===================== PLAYLISTS =====================
-
-### Get all playlists
+### Get all playlists (open)
 GET {{baseUrl}}/playlists
 
-### Get playlist by ID
+### Get playlist by ID (open)
 GET {{baseUrl}}/playlists/1
 
-### Get playlists by username
-GET {{baseUrl}}/playlists/user/testuser
+### Get playlists by username (open) skriv jonas eller asger
+GET {{baseUrl}}/playlists/user/jonas
 
 ### Create playlist (protected)
 POST {{baseUrl}}/playlists
@@ -166,7 +220,7 @@ Content-Type: application/json
   "songIds": [1, 2, 3]
 }
 
-### Update playlist by ID (protected)
+### Update playlist (protected)
 PUT {{baseUrl}}/playlists/1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -177,6 +231,12 @@ Content-Type: application/json
   "songIds": [2, 4]
 }
 
-### Delete playlist by ID (protected)
-DELETE {{baseUrl}}/playlists/1
+### Delete playlist (protected)
+DELETE {{baseUrl}}/playlists/4
 Authorization: Bearer {{authToken}}
+
+####################################################################
+### UTILITIES
+####################################################################
+
+

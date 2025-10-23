@@ -48,21 +48,39 @@ public class SecurityDAO implements ISecurityDAO {
     @Override
     public User createUser(String username, String password) {
         try (EntityManager em = getEntityManager()) {
-            User userEntity = em.find(User.class, username);
-            if (userEntity != null)
+
+            //Checks if the user already exists
+            User existing = em.find(User.class, username);
+            if (existing != null)
                 throw new EntityExistsException("User with username: " + username + " already exists");
-            userEntity = new User(username, password);
+
             em.getTransaction().begin();
+
+            //Finds role and adds it to new user
             Role userRole = em.find(Role.class, "user");
-            if (userRole == null)
+            if (userRole == null) {
                 userRole = new Role("user");
-            em.persist(userRole);
+                em.persist(userRole);
+            }
+
+            //Create new user and hash the password
+            User userEntity = new User(username, password);
             userEntity.addRole(userRole);
             em.persist(userEntity);
+
+            //Adds the new user to user_profile DB
+            app.entities.UserProfile profile = app.entities.UserProfile.builder()
+                    .username(username)
+                    .account(userEntity)
+                    .build();
+            em.persist(profile);
+
             em.getTransaction().commit();
             return userEntity;
-        }catch (Exception e){
-            e.printStackTrace();
+
+        } catch (EntityExistsException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ApiException(400, e.getMessage());
         }
     }
@@ -74,13 +92,13 @@ public class SecurityDAO implements ISecurityDAO {
             if (user == null)
                 throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
             em.getTransaction().begin();
-                Role role = em.find(Role.class, newRole);
-                if (role == null) {
-                    role = new Role(newRole);
-                    em.persist(role);
-                }
-                user.addRole(role);
-                //em.merge(user);
+            Role role = em.find(Role.class, newRole);
+            if (role == null) {
+                role = new Role(newRole);
+                em.persist(role);
+            }
+            user.addRole(role);
+            //em.merge(user);
             em.getTransaction().commit();
             return user;
         }

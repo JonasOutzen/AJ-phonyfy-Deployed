@@ -1,10 +1,10 @@
 
-@baseUrl = http://localhost:7076
-@authToken = {{authToken}}
+@baseUrl = http://localhost:7076/api
+@authToken = eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJKb25hcyBSZWluaG9sZCBPdXR6ZW4iLCJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MTIxNTgxOSwicm9sZXMiOiJBRE1JTix1c2VyIiwidXNlcm5hbWUiOiJ0ZXN0dXNlciJ9.p_mB5-9cASexW6SyyXAl_nOjp3YLzWcE3ckbM2QEzkQ
 
 ### ===================== SECURITY =====================
 
-### Health check
+### Health check (open)
 GET {{baseUrl}}/auth/healthcheck
 
 ### Test (open)
@@ -33,7 +33,7 @@ Content-Type: application/json
 > {% client.global.set("authToken", JSON.parse(response.body).token); %}
 
 ### Add role to current user (requires USER)
-# Example roles: "USER", "ADMIN" (case-insensitive on server side if you handle normalization)
+# Example roles: "USER", "ADMIN"
 POST {{baseUrl}}/auth/user/addrole
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -60,7 +60,26 @@ GET {{baseUrl}}/songs
 ### Get song by ID
 GET {{baseUrl}}/songs/1
 
-### Create song (typically protected)
+### Create Artist
+POST {{baseUrl}}/artists
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "artistName": "Demo Artist",
+  "type": "Solo"
+}
+### Create Album
+POST {{baseUrl}}/albums
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "albumName": "Demo Album",
+  "artistId": 13
+}
+
+### Create song (protected)
 POST {{baseUrl}}/songs
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -69,11 +88,11 @@ Content-Type: application/json
   "songName": "Hello World",
   "albumName": "Demo Album",
   "mainArtistName": "Demo Artist",
-  "genre": "POP",
+  "genre": "TEST",
   "duration": "3:45"
 }
 
-### Update song by ID (typically protected)
+### Update song by ID (protected)
 PUT {{baseUrl}}/songs/1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -86,7 +105,7 @@ Content-Type: application/json
   "duration": "4:15"
 }
 
-### Delete song by ID (typically protected)
+### Delete song by ID (protected)
 DELETE {{baseUrl}}/songs/1
 Authorization: Bearer {{authToken}}
 
@@ -98,7 +117,7 @@ GET {{baseUrl}}/artists
 ### Get artist by ID
 GET {{baseUrl}}/artists/1
 
-### Create artist (typically protected)
+### Create artist (protected)
 POST {{baseUrl}}/artists
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -108,7 +127,7 @@ Content-Type: application/json
   "type": "Solo"
 }
 
-### Update artist by ID (typically protected)
+### Update artist by ID (protected)
 PUT {{baseUrl}}/artists/1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -118,7 +137,7 @@ Content-Type: application/json
   "type": "Band"
 }
 
-### Delete artist by ID (typically protected)
+### Delete artist by ID (protected)
 DELETE {{baseUrl}}/artists/1
 Authorization: Bearer {{authToken}}
 
@@ -136,7 +155,7 @@ GET {{baseUrl}}/playlists/1
 ### Get playlists by username
 GET {{baseUrl}}/playlists/user/testuser
 
-### Create playlist (typically protected)
+### Create playlist (protected)
 POST {{baseUrl}}/playlists
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -147,7 +166,7 @@ Content-Type: application/json
   "songIds": [1, 2, 3]
 }
 
-### Update playlist by ID (typically protected)
+### Update playlist by ID (protected)
 PUT {{baseUrl}}/playlists/1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -158,6 +177,6 @@ Content-Type: application/json
   "songIds": [2, 4]
 }
 
-### Delete playlist by ID (typically protected)
+### Delete playlist by ID (protected)
 DELETE {{baseUrl}}/playlists/1
 Authorization: Bearer {{authToken}}

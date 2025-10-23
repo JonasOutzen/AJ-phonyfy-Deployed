@@ -156,6 +156,7 @@ public class SecurityController implements ISecurityController {
             e.printStackTrace();
             throw new ApiException(500, "Could not create token");
         }
+
     }
 
     @Override

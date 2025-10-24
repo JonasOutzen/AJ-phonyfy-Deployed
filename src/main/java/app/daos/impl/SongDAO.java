@@ -121,13 +121,11 @@ public class SongDAO implements IDAO<SongDTO, Integer> {
 
             Song s = em.find(Song.class, id);
             if (s != null) {
-                // Ensure associations are broken so the Song won't be cascaded back
-                // Use a copy to avoid ConcurrentModification
                 var playlistsCopy = new java.util.HashSet<>(s.getPlaylists());
                 for (var p : playlistsCopy) {
-                    p.getSongs().remove(s);   // break the link on the owning side
+                    p.getSongs().remove(s);
                 }
-                s.getPlaylists().clear();      // break on the inverse side (if mapped)
+                s.getPlaylists().clear();
 
                 em.remove(s);
             }

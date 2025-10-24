@@ -17,7 +17,6 @@ public final class Populate {
     private Populate() {
     }
 
-    // ---------- tiny model for seed input ----------
     private record Track(String name, String genre, String featuredArtist, String mmss) {
     }
 
@@ -55,7 +54,7 @@ public final class Populate {
                 s.setSongName(t.name());
                 s.setGenre(t.genre());
                 s.setFeaturedArtist(t.featuredArtist);
-                s.setDuration(t.mmss());       // expects "m:ss"
+                s.setDuration(t.mmss());
                 s.setMainArtist(artist);
                 s.setAlbum(album);
                 em.persist(s);
@@ -86,13 +85,13 @@ public final class Populate {
             try {
                 tx.begin();
 
-                // --- Roles ---
+                // Roles
                 Role roleUser = new Role("user");
                 Role roleAdmin = new Role("admin");
                 em.persist(roleUser);
                 em.persist(roleAdmin);
 
-                // --- Users (security) ---
+                // Users (security)
                 User jonas = new User("jonas", "jonaspw");
                 jonas.addRole(roleUser);
                 em.persist(jonas);
@@ -102,7 +101,7 @@ public final class Populate {
                 asger.addRole(roleAdmin);
                 em.persist(asger);
 
-                // --- UserProfiles ---
+                // UserProfiles
                 UserProfile jonasProfile = UserProfile.builder()
                         .username(jonas.getUsername())
                         .account(jonas)
@@ -139,7 +138,7 @@ public final class Populate {
                 );
 
 
-                // Linkin Park — Hybrid Theory (2000) — full tracklist (12)
+                // Linkin Park — Hybrid Theory (2000)
                 addAlbumWithTracks(em,
                         "Linkin Park", "Band",
                         "Hybrid Theory", LocalDate.of(2000, 10, 24),

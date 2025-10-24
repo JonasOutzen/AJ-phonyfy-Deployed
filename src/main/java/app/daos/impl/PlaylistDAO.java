@@ -84,7 +84,7 @@ public class PlaylistDAO implements IDAO<PlaylistDTO, Integer> {
                 p.setSongs(refs);
             }
 
-            // Our @PrePersist will recalculate the totaltDuration
+            // Our @PrePersist will recalculate the totalDuration
             em.persist(p);
             em.getTransaction().commit();
             return new PlaylistDTO(p);

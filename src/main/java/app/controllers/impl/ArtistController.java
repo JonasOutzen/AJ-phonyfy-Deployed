@@ -14,12 +14,12 @@ import java.util.List;
 public class ArtistController implements IController<ArtistDTO, Integer> {
 
     private final ArtistDAO artistDao;
-    private final AlbumDAO albumDao; // optional, see note below
+    private final AlbumDAO albumDao;
 
     public ArtistController() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
         this.artistDao = ArtistDAO.getInstance(emf);
-        this.albumDao  = AlbumDAO.getInstance(emf); // or remove if you’ll use artistDao.getAlbumsByArtistId(...)
+        this.albumDao  = AlbumDAO.getInstance(emf);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ArtistController implements IController<ArtistDTO, Integer> {
                 .check(a -> a.getAlbumName() != null && !a.getAlbumName().isBlank(), "Album name must be set")
                 .get();
 
-        // bind album to artist from path
+        // Bind album to artist
         req.setArtistId(artistId);
 
         AlbumDTO created = albumDao.create(req);
@@ -53,7 +53,6 @@ public class ArtistController implements IController<ArtistDTO, Integer> {
     }
 
 
-    // Extra: GET /artists/{id}/albums
     public void readAlbumsByArtist(Context ctx) {
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid key").get();
         List<AlbumDTO> albums = artistDao.readAlbumsByArtistId(id);
@@ -91,7 +90,6 @@ public class ArtistController implements IController<ArtistDTO, Integer> {
 
     @Override
     public ArtistDTO validateEntity(Context ctx) {
-        // Based on your Artist entity fields: artistName (required), type (optional). :contentReference[oaicite:1]{index=1}
         return ctx.bodyValidator(ArtistDTO.class)
                 .check(a -> a.getArtistName() != null && !a.getArtistName().isEmpty(), "Artist name must be set")
                 .get();

@@ -48,7 +48,7 @@ public class Album {
     public void updateTotalDuration() {
         int totalSeconds = songs.stream()
                 .mapToInt(song -> {
-                    // If your Song stores "duration" as "mm:ss"
+                    // If Song stores "duration" as "mm:ss"
                     // replace with song.getDurationSeconds() if you store seconds instead
                     String d = song.getDuration(); // e.g. "3:45"
                     String[] parts = d.split(":");

@@ -49,7 +49,6 @@ public class AlbumDAO implements IDAO<AlbumDTO, Integer> {
 
             Album album = albumDTO.toEntity();
 
-            // ensure artist relation is a managed reference
             if (albumDTO.getArtistId() != null) {
                 Artist artistRef = em.getReference(Artist.class, albumDTO.getArtistId());
                 album.setArtist(artistRef);
@@ -68,7 +67,7 @@ public class AlbumDAO implements IDAO<AlbumDTO, Integer> {
 
             Album album = em.find(Album.class, id);
             if (album == null) {
-                em.getTransaction().commit(); // nothing to update; keep style consistent
+                em.getTransaction().commit();
                 return null;
             }
 
@@ -81,7 +80,6 @@ public class AlbumDAO implements IDAO<AlbumDTO, Integer> {
                 album.setArtist(artistRef);
             }
 
-            // album is managed; merge not required
             em.getTransaction().commit();
             return new AlbumDTO(album);
         }

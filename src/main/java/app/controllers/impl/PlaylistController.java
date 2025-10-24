@@ -33,7 +33,6 @@ public class PlaylistController implements IController<PlaylistDTO, Integer> {
         ctx.json(list, PlaylistDTO.class);
     }
 
-    // Extra: GET /playlists/user/{username}
     public void readPlaylistsByOwner(Context ctx) {
         String username = ctx.pathParam("username");
         List<PlaylistDTO> playlists = dao.readPlaylistsByOwner(username);

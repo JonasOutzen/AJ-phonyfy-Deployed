@@ -61,13 +61,12 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
                 profile.setUsername(dto.getUsername());
             }
 
-            // Optionally attach existing playlists by id (if provided)
+            // Attach existing playlists by id (if provided)
             if (dto.getPlaylistIds() != null && !dto.getPlaylistIds().isEmpty()) {
                 Set<Playlist> pls = dto.getPlaylistIds().stream()
                         .map(id -> em.getReference(Playlist.class, id))
                         .collect(Collectors.toSet());
                 profile.setPlaylists(pls);
-                // maintain owning side
                 pls.forEach(p -> p.setOwner(profile));
             }
 
@@ -84,7 +83,7 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
 
             UserProfile profile = em.find(UserProfile.class, username);
             if (profile == null) {
-                em.getTransaction().commit(); // nothing to update
+                em.getTransaction().commit();
                 return null;
             }
 
@@ -109,7 +108,6 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
                 pls.forEach(p -> p.setOwner(profile));
             }
 
-            // profile is managed; no merge required
             em.getTransaction().commit();
             return new UserProfileDTO(profile);
         }
@@ -121,7 +119,6 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
             em.getTransaction().begin();
             UserProfile profile = em.find(UserProfile.class, username);
             if (profile != null) {
-                // If you want to keep playlists but just detach ownership:
                 profile.getPlaylists().forEach(p -> p.setOwner(null));
                 profile.getPlaylists().clear();
 
@@ -138,9 +135,9 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
         }
     }
 
-    /* ------------ Convenience queries (not part of IDAO) ------------ */
+    // Convenience queries
 
-    /** Get playlist IDs owned by this user. */
+    //  Get playlist IDs owned by this user
     public Set<Integer> getPlaylistIdsByUsername(String username) {
         try (EntityManager em = emf.createEntityManager()) {
             UserProfile profile = em.find(UserProfile.class, username);
@@ -151,7 +148,7 @@ public class UserProfileDAO implements IDAO<UserProfileDTO, String> {
         }
     }
 
-    /** Get playlists as DTOs (requires your PlaylistDTO class). */
+    // Get playlists as DTOs
     public List<PlaylistDTO> getPlaylistsByUsername(String username) {
         try (EntityManager em = emf.createEntityManager()) {
             TypedQuery<Playlist> q = em.createQuery(

@@ -20,11 +20,11 @@ public class SongController implements IController<SongDTO, Integer> {
 
     @Override
     public void read(Context ctx) {
-        //What we are requesting
+        // What we are requesting
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid key").get();
-        //The DTO
+        // The DTO
         SongDTO songDTO = dao.read(id);
-        //Response
+        // Response
         ctx.res().setStatus(200);
         ctx.json(songDTO, SongDTO.class);
     }
@@ -33,39 +33,39 @@ public class SongController implements IController<SongDTO, Integer> {
     public void readAll(Context ctx) {
         // List of DTOS
         List<SongDTO> songDTOS = dao.readAll();
-        // response
+        // Response
         ctx.res().setStatus(200);
         ctx.json(songDTOS, SongDTO.class);
     }
 
     @Override
     public void create(Context ctx) {
-        // request
+        // Request
         SongDTO jsonRequest = ctx.bodyAsClass(SongDTO.class);
         // DTO
         SongDTO songDTO = dao.create(jsonRequest);
-        // response
+        // Response
         ctx.res().setStatus(201);
         ctx.json(songDTO, SongDTO.class);
     }
 
     @Override
     public void update(Context ctx) {
-        // request
+        // Request
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        // dto
+        // DTO
         SongDTO songDTO = dao.update(id, validateEntity(ctx));
-        // response
+        // Response
         ctx.res().setStatus(200);
         ctx.json(songDTO, SongDTO.class);
     }
 
     @Override
     public void delete(Context ctx) {
-        // request
+        // Request
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
         dao.delete(id);
-        // response
+        // Response
         ctx.res().setStatus(204);
     }
 
